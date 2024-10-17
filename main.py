@@ -5,7 +5,10 @@ from field import *
 def main():
 
   # Potential expansion: allow user to input params.
-  field = Field(50, 75)
+  field = Field(DEFAULT_FIELD_WIDTH, DEFAULT_FIELD_HEIGHT)
+  field.initEntities()
+  
+  field.drawField()
   
   return
 

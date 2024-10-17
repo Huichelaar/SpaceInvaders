@@ -1,7 +1,12 @@
+from params import *
 from entity import *
 
 # Superclass of invader & tank.
 class Weapon(Entity):
+  
+  def __init__(self, x, y):
+    super().__init__(x, y)
+    self.isAlive = True
   
   def shoot():
     # TODO Generate bullet
@@ -11,7 +16,7 @@ class Weapon(Entity):
 # Fends off invaders.
 class Tank(Weapon):
 
-  def __init__(x, y):
+  def __init__(self, x, y):
     super().__init__(x, y)
     self.faction = FACTION_TANK
   
@@ -23,7 +28,7 @@ class Tank(Weapon):
 # Tries to get past tank.
 class Invader(Weapon):
 
-  def __init__(x, y):
+  def __init__(self, x, y):
     super().__init__(x, y)
     self.faction = FACTION_INVADER
   
