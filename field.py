@@ -18,6 +18,7 @@ class Field:
   def __init__(self, width = DEFAULT_FIELD_WIDTH, height = DEFAULT_FIELD_HEIGHT):
     self.width = width
     self.height = height
+    self.tank = None
     
     # Maps for each entity.
     self.invaderMap = [[None for x in range(width)] for y in range(height)]
@@ -41,7 +42,8 @@ class Field:
       if self.tankMap[y][x] != None:
         raise MultipleTanksOnTileError("Attempted to generate tank on a tile already occupied by a tank.")
       else:
-        self.tankMap[y][x] = Tank(x, y)
+        self.tank = Tank(x, y)
+        self.tankMap[y][x] = self.tank
     except Exception as e:
       print("An error occurred: ", e)
       print("Exiting program due to error: ", e)
