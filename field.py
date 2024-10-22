@@ -2,7 +2,6 @@
 # Contains a three-dimensional array of entities.
 
 # NOTE. Should put weapons on one map and list bullets, this should make movement of weapons and bullets & impact of bullets easy to keep track of. Likewise, victory & loss conditions should be easy to check this way.
-
 import math
 from params import *
 from weapon import *
@@ -19,19 +18,29 @@ class Field:
     self.width = width
     self.height = height
     self.tank = None
+    self.bullets = list()
+    self.invaders = list()
     
     # Maps for each entity.
-    self.invaderMap = [[None for x in range(width)] for y in range(height)]
-    self.tankMap = [[None for x in range(width)] for y in range(height)]
-    self.invaderBulletMap = [[None for x in range(width)] for y in range(height)]
-    self.tankBulletMap = [[None for x in range(width)] for y in range(height)]
+    # 'Next' maps are used whilst entities move
+    # during game logic.
+    self.invaderMapCurr = [[None for x in range(width)] for y in range(height)]
+    self.invaderMapNext = list()
+    self.tankMapCurr = [[None for x in range(width)] for y in range(height)]
+    self.tankMapNext = list()
+    self.invaderBulletMapCurr = [[None for x in range(width)] for y in range(height)]
+    self.invaderBulletMapNext = list()
+    self.tankBulletMapCurr = [[None for x in range(width)] for y in range(height)]
+    self.tankBulletMapNext = list()
 
   def spawnInvader(self, x, y):
     try:
-      if self.invaderMap[y][x] != None:
+      if self.invaderMapCurr[y][x] != None:
         raise MultipleInvadersOnTileError("Attempted to generate invader on a tile already occupied by an invader.")
       else:
-        self.invaderMap[y][x] = Invader(x, y)
+        invader = Invader(self, x, y)
+        self.invaderMapCurr[y][x] = invader
+        self.invaders.append(invader)
     except Exception as e:
       print("An error occurred: ", e)
       print("Exiting program due to error: ", e)
@@ -39,11 +48,11 @@ class Field:
     
   def spawnTank(self, x, y):
     try:
-      if self.tankMap[y][x] != None:
+      if self.tankMapCurr[y][x] != None:
         raise MultipleTanksOnTileError("Attempted to generate tank on a tile already occupied by a tank.")
       else:
-        self.tank = Tank(x, y)
-        self.tankMap[y][x] = self.tank
+        self.tank = Tank(self, x, y)
+        self.tankMapCurr[y][x] = self.tank
     except Exception as e:
       print("An error occurred: ", e)
       print("Exiting program due to error: ", e)
@@ -94,23 +103,23 @@ class Field:
         symbol = EMPTY_SYMBOL
         
         # Draw invaders.
-        if self.invaderMap[y][x] != None:
+        if self.invaderMapCurr[y][x] != None:
           symbol = INVADER_SYMBOL
-          if not self.invaderMap[y][x].isAlive:
+          if not self.invaderMapCurr[y][x].isAlive:
             symbol = EXPLOSION_SYMBOL
         
         # Draw tanks.
-        elif self.tankMap[y][x] != None:
+        elif self.tankMapCurr[y][x] != None:
           symbol = TANK_SYMBOL
-          if not self.tankMap[y][x].isAlive:
+          if not self.tankMapCurr[y][x].isAlive:
             symbol = EXPLOSION_SYMBOL
         
         # Draw bullets.
-        elif self.invaderBulletMap[y][x] != None:
+        elif self.invaderBulletMapCurr[y][x] != None:
           symbol = INVADER_BULLET_SYMBOL
-          if self.tankBulletMap[y][x] != None:
+          if self.tankBulletMapCurr[y][x] != None:
             symbol = BOTH_BULLET_SYMBOL
-        elif self.tankBulletMap[y][x] != None:
+        elif self.tankBulletMapCurr[y][x] != None:
           symbol = TANK_BULLET_SYMBOL
         
         print(symbol, end='')
@@ -121,3 +130,19 @@ class Field:
     
     # Footer.
     print('\n' + header)
+  
+  # Empties 'Next' buffer tilemaps.
+  def clearNextMaps(self):
+    self.invaderMapNext = [[None for x in range(self.width)] for y in range(self.height)]
+    self.tankMapNext = [[None for x in range(self.width)] for y in range(self.height)]
+    self.invaderBulletMapNext = [[None for x in range(self.width)] for y in range(self.height)]
+    self.tankBulletMapNext = [[None for x in range(self.width)] for y in range(self.height)]
+  
+  # Moves next tilemaps into current tilemaps.
+  def updateMaps(self):
+    self.invaderMapCurr = self.invaderMapNext
+    self.tankMapCurr = self.tankMapNext
+    self.invaderBulletMapCurr = self.invaderBulletMapNext
+    self.tankBulletMapCurr = self.tankBulletMapNext
+    
+    

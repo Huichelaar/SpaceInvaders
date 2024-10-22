@@ -17,6 +17,17 @@ EXPLOSION_SYMBOL = '@'
 EMPTY_SYMBOL = ' '
 FRAME_SYMBOL = '|'
 
+SCREEN_REFRESH = 0.1            # Re-draw screen every SCREEN_REFRESH seconds.
+GAMELOGIC_REFRESH = 0.1         # Re-run game logic, including reading input, every GAMELOGIC_REFRESH seconds.
+
+TANK_BULLET_VELOCITY = -0.2     # Time in seconds for bullet to move 1 tile. Negative for moving up.
+INVADER_BULLET_VELOCITY = 0.5   # Time in seconds for bullet to move 1 tile. Positive for moving down.
+
+
 # Enums, don't touch these!
 FACTION_TANK = 0
 FACTION_INVADER = 1
+
+INPUT_LEFT = 1 << 0
+INPUT_RIGHT = 1 << 1
+INPUT_UP = 1 << 2
