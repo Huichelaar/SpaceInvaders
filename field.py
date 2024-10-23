@@ -14,12 +14,12 @@ class MultipleTanksOnTileError(Exception):
 
 class Field:
 
-  def __init__(self, width = DEFAULT_FIELD_WIDTH, height = DEFAULT_FIELD_HEIGHT):
+  def __init__(self, width=FIELD_WIDTH, height=FIELD_HEIGHT):
     self.width = width
     self.height = height
     self.tank = None
     self.bullets = list()
-    self.invaders = list()
+    self.swarm = None
     
     # Maps for each entity.
     # 'Next' maps are used whilst entities move
@@ -33,14 +33,35 @@ class Field:
     self.tankBulletMapCurr = [[None for x in range(width)] for y in range(height)]
     self.tankBulletMapNext = list()
 
+  def spawnInvaderSwarm(self, width=SWARM_WIDTH, height=SWARM_HEIGHT):
+  
+    # We attempt to spread invaders evenly in their territory,
+    # Whilst leaving room left and right for them to move to.
+    invaderTerritoryStart = (self.width - width) >> 1
+    invaderTerritoryEnd = invaderTerritoryStart + width
+    invaderTerritorySize = width * height
+    step = math.floor(invaderTerritorySize / SWARM_SIZE)
+    
+    self.swarm = Swarm(self, invaderTerritoryStart, 0, INVADER_VELOCITY, width, height)
+    x = invaderTerritoryStart
+    y = 0
+    self.invaderCount = 0
+    while y < height:
+      while x < invaderTerritoryEnd:
+        self.spawnInvader(x, y)
+        self.invaderCount += 1
+        x += step
+      x -= SWARM_WIDTH
+      y += 1
+
   def spawnInvader(self, x, y):
     try:
       if self.invaderMapCurr[y][x] != None:
         raise MultipleInvadersOnTileError("Attempted to generate invader on a tile already occupied by an invader.")
       else:
-        invader = Invader(self, x, y)
+        invader = Invader(self, self.swarm, x, y)
         self.invaderMapCurr[y][x] = invader
-        self.invaders.append(invader)
+        self.swarm.invaders.append(invader)
     except Exception as e:
       print("An error occurred: ", e)
       print("Exiting program due to error: ", e)
@@ -60,25 +81,9 @@ class Field:
 
   # Generate entities at the start of game.
   def initEntities(self):
-  
-    # Generate invaders.
-    # We attempt to spread invaders evenly in their territory,
-    # Whilst leaving room left and right for them to move to.
-    invaderTerritoryStart = (DEFAULT_FIELD_WIDTH - DEFAULT_SWARM_WIDTH) >> 1
-    invaderTerritoryEnd = invaderTerritoryStart + DEFAULT_SWARM_WIDTH
-    invaderTerritorySize = DEFAULT_SWARM_WIDTH * DEFAULT_SWARM_HEIGHT
-    step = math.floor(invaderTerritorySize / DEFAULT_SWARM_SIZE)
     
-    x = invaderTerritoryStart
-    y = 0
-    self.invaderCount = 0
-    while y < DEFAULT_SWARM_HEIGHT:
-      while x < invaderTerritoryEnd:
-        self.spawnInvader(x, y)
-        self.invaderCount += 1
-        x += step
-      x -= DEFAULT_SWARM_WIDTH
-      y += 1
+    # Generate invaders.
+    self.spawnInvaderSwarm(SWARM_WIDTH, SWARM_HEIGHT)
     
     # Generate tank.
     # We generate one tank.
@@ -144,5 +149,3 @@ class Field:
     self.tankMapCurr = self.tankMapNext
     self.invaderBulletMapCurr = self.invaderBulletMapNext
     self.tankBulletMapCurr = self.tankBulletMapNext
-    
-    

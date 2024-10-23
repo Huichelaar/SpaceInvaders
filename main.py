@@ -80,6 +80,10 @@ def moveBullets(field):
   for bullet in field.bullets:
     bullet.move()
 
+# Moves invaders.
+def moveInvaders(field):
+  field.swarm.move()
+
 def runGameLogic(field):
   timeOut = time.time() + 20
   curTime = time.time()
@@ -95,7 +99,7 @@ def runGameLogic(field):
     
     # Handle entities.
     handlePlayerInput(field.tank)   # Tank
-    # TODO                          # Invaders
+    moveInvaders(field)             # Invaders
     moveBullets(field)              # Bullets
     
     # Copy next maps to current maps.
@@ -110,7 +114,7 @@ def runGameLogic(field):
 def main():
 
   # Potential expansion: allow user to input params.
-  field = Field(DEFAULT_FIELD_WIDTH, DEFAULT_FIELD_HEIGHT)
+  field = Field(FIELD_WIDTH, FIELD_HEIGHT)
   field.initEntities()
   
   gameLogicThread = Thread(target=runGameLogic, args=(field,), daemon=True)

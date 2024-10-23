@@ -2,6 +2,53 @@ from params import *
 from entity import *
 from bullet import *
 
+# Every invader is part of a swarm.
+class Swarm(Entity):
+  
+  def __init__(self, field, x, y, velocity=INVADER_VELOCITY, width=SWARM_WIDTH, height=SWARM_HEIGHT):
+    super().__init__(field, x, y)
+    self.width = width
+    self.height = height
+    self.velocity = velocity
+
+    self.invaders = list()
+    self.direction = -1
+  
+  # Move entire swarm.
+  # Shimmy horizontally,
+  # move down vertically if edge has been reached.
+  def move(self):
+    super().move()
+    
+    # Don't move invaders if not enough time has passed.
+    if self.velocity > self.moveTimer:
+      for invader in self.invaders:
+        self.field.invaderMapNext[invader.y][invader.x] = invader
+      return
+  
+    # Move down vertically if edge has been reached.
+    if (((self.direction < 0) and (self.x == 0)) or
+        ((self.direction > 0) and (self.x + self.width >= self.field.width - 1))):
+      if self.y >= self.field.height:
+        # TODO Bottom reached, Invaders win
+        return
+      self.direction *= -1      # Change moving direction.
+      self.y += 1
+      for invader in self.invaders:
+        invader.y += 1
+        self.field.invaderMapNext[invader.y][invader.x] = invader
+
+    # Move horizontally.
+    else:
+      self.x += self.direction
+      for invader in self.invaders:
+        invader.x += self.direction
+        self.field.invaderMapNext[invader.y][invader.x] = invader
+  
+    # Reset movetimer.
+    self.moveTimer -= self.velocity
+    return
+
 # Superclass of invader & tank.
 class Weapon(Entity):
   
@@ -63,11 +110,7 @@ class Tank(Weapon):
 # Tries to get past tank.
 class Invader(Weapon):
 
-  def __init__(self, field, x, y):
+  def __init__(self, field, swarm, x, y):
     super().__init__(field, x, y)
+    self.swarm = swarm
     self.faction = FACTION_INVADER
-  
-  def move(self):
-    # TODO, shimmy horizontally,
-    # move down vertically if edge has been reached
-    return
