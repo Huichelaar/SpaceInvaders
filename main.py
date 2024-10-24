@@ -67,22 +67,32 @@ def refreshGameScreen(field):
     if curTime < endTime:
       time.sleep(endTime - curTime)
 
-# Adjusts entities' position based on key input.
+# Adjusts tank position based on key input.
 # Shoots bullets based on key input.
-def handlePlayerInput(tank):
+def runTank(tank):
   global INPUT_BITFIELD
+
+  # Nothing to return if no tank.
+  if tank == None:
+    return
 
   INPUT_BITFIELD = tank.move(INPUT_BITFIELD)
   INPUT_BITFIELD = tank.shoot(INPUT_BITFIELD)
 
+# Moves invaders.
+# Shoots bullets periodically.
+def runInvaders(field):
+  field.swarm.move()
+  field.swarm.shoot()
+
 # Moves bullets.
 def moveBullets(field):
-  for bullet in field.bullets:
-    bullet.move()
+  # Moving bullets will be consumed if they kill a weapon,
+  # Therefore we make a copy first.
+  bulletsCopy = field.bullets.copy()
 
-# Moves invaders.
-def moveInvaders(field):
-  field.swarm.move()
+  for bullet in bulletsCopy:
+    bullet.move()
 
 def runGameLogic(field):
   timeOut = time.time() + 20
@@ -98,8 +108,8 @@ def runGameLogic(field):
     field.clearNextMaps()
     
     # Handle entities.
-    handlePlayerInput(field.tank)   # Tank
-    moveInvaders(field)             # Invaders
+    runTank(field.tank)             # Tank
+    runInvaders(field)              # Invaders
     moveBullets(field)              # Bullets
     
     # Copy next maps to current maps.

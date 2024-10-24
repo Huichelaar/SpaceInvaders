@@ -18,7 +18,7 @@ class Field:
     self.width = width
     self.height = height
     self.tank = None
-    self.bullets = list()
+    self.bullets = set()
     self.swarm = None
     
     # Maps for each entity.
@@ -61,7 +61,7 @@ class Field:
       else:
         invader = Invader(self, self.swarm, x, y)
         self.invaderMapCurr[y][x] = invader
-        self.swarm.invaders.append(invader)
+        self.swarm.invaders.add(invader)
     except Exception as e:
       print("An error occurred: ", e)
       print("Exiting program due to error: ", e)
@@ -109,15 +109,14 @@ class Field:
         
         # Draw invaders.
         if self.invaderMapCurr[y][x] != None:
-          symbol = INVADER_SYMBOL
-          if not self.invaderMapCurr[y][x].isAlive:
-            symbol = EXPLOSION_SYMBOL
+          if self.invaderBulletMapCurr[y][x] != None:
+            symbol = INVADER_PLUS_BULLET_SYMBOL
+          else:
+            symbol = INVADER_SYMBOL
         
         # Draw tanks.
         elif self.tankMapCurr[y][x] != None:
           symbol = TANK_SYMBOL
-          if not self.tankMapCurr[y][x].isAlive:
-            symbol = EXPLOSION_SYMBOL
         
         # Draw bullets.
         elif self.invaderBulletMapCurr[y][x] != None:

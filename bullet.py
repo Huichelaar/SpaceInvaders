@@ -23,15 +23,13 @@ class Bullet(Entity):
     if abs(self.velocity) > self.moveTimer:
       if (self.faction == FACTION_TANK):
         if (self.field.invaderMapNext[self.y][self.x]):
-          # TODO Kill invader.
-          pass
+          self.kill(self.field.invaderMapNext[self.y][self.x])  # Kill invader.
         else:
           self.field.tankBulletMapNext[self.y][self.x] = self
         pass
       elif (self.faction == FACTION_INVADER):
         if (self.field.tankMapNext[self.y][self.x]):
-          # TODO Kill tank.
-          pass
+          self.kill(self.field.tankMapNext[self.y][self.x])     # Kill tank.
         else:
           self.field.invaderBulletMapNext[self.y][self.x] = self
         pass
@@ -50,10 +48,10 @@ class Bullet(Entity):
         return    # Bullet travelled offscreen.
       
       if (self.faction == FACTION_TANK) and (self.field.invaderMapNext[self.y][self.x] != None):
-        # TODO Kill invader.
+        self.kill(self.field.invaderMapNext[self.y][self.x])  # Kill invader.
         return
       elif (self.faction == FACTION_INVADER) and (self.field.tankMapNext[self.y][self.x] != None):
-        # TODO Kill tank.
+        self.kill(self.field.tankMapNext[self.y][self.x])     # Kill tank.
         return
     
     # Nothing to kill, place bullet.
@@ -67,3 +65,8 @@ class Bullet(Entity):
     
     # Update position.
     super().updatePos(self.x, self.y + distance)
+  
+  # Bullets can kill weapons.
+  def kill(self, weapon):
+    self.field.bullets.remove(self)   # Bullet is consumed when it kills.
+    weapon.die()
