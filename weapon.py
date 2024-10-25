@@ -34,11 +34,13 @@ class Swarm(Entity):
         ((self.direction > 0) and (self.x + self.width >= self.field.width - 1))):
       
       # Check if bottom has been reached.
+      # If so, Invaders win.
       for invader in self.invaders:
-        if invader.y >= self.field.height:
-          # TODO Bottom reached, Invaders win
-          break
+        if (invader.y >= self.field.height) and (self.field.state == GAME_ONGOING):
+          self.field.state = GAME_DEFEAT
+          return
       
+      # Move down vertically.
       self.direction *= -1      # Change moving direction.
       self.y += 1
       for invader in self.invaders:
@@ -137,6 +139,10 @@ class Tank(Weapon):
   def die(self):
     super().die()
     self.field.tank = None
+    
+    # Invaders win if tank has died.
+    if self.field.state == GAME_ONGOING:
+      self.field.state = GAME_DEFEAT
 
 # AI-controlled invader.
 # Tries to get past tank.
@@ -149,6 +155,11 @@ class Invader(Weapon):
 
   def updatePos(self, x, y):
     self.field.invaderMapNext[y][x] = self    # Occupy new coordinates.
+    
+    # Kill tank if same space is occupied.
+    if (self.field.tankMapNext[y][x]):
+      self.field.tankMapNext[y][x].die()
+    
     super().updatePos(x, y)
   
   # Generate bullet
@@ -167,3 +178,7 @@ class Invader(Weapon):
   def die(self):
     super().die()
     self.swarm.invaders.remove(self)
+    
+    # Tank wins if all invaders have died.
+    if (not self.swarm.invaders) and (self.field.state == GAME_ONGOING):
+      self.field.state = GAME_VICTORY

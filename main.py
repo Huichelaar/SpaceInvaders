@@ -16,6 +16,9 @@ INPUT_KEY_UP_PRESS = False
 # Input bitfield tracks input that still needs to be handled.
 INPUT_BITFIELD = 0
 
+# Bool, False if game is not over yet.
+GAME_OVER = False
+
 def setKeyPressFlags(key):
   global INPUT_KEY_LEFT_PRESS
   global INPUT_KEY_RIGHT_PRESS
@@ -53,11 +56,20 @@ def setKeyReleaseFlags(key):
 def clearScreen():
   os.system('cls' if os.name=='nt' else 'clear')
 
+def displayEndState(field):
+  if (field.state == GAME_VICTORY):
+    print("Victory!")
+  elif (field.state == GAME_DEFEAT):
+    print("Defeat!")
+  elif (field.state == GAME_TIMEOUT):
+    print("Time out!")
+  else:
+    print("Game over!")
+
 def refreshGameScreen(field):
-  timeOut = time.time() + 20
-  curTime = time.time()
+  global GAME_OVER
   
-  while curTime < timeOut:
+  while not GAME_OVER:
     endTime = time.time() + SCREEN_REFRESH
     
     clearScreen()
@@ -66,6 +78,9 @@ def refreshGameScreen(field):
     curTime = time.time()
     if curTime < endTime:
       time.sleep(endTime - curTime)
+  
+  # Display which faction has won if game has ended.
+  displayEndState(field)
 
 # Adjusts tank position based on key input.
 # Shoots bullets based on key input.
@@ -95,10 +110,12 @@ def moveBullets(field):
     bullet.move()
 
 def runGameLogic(field):
-  timeOut = time.time() + 20
+  global GAME_OVER
+
+  timeOut = time.time() + TIME_OUT
   curTime = time.time()
   
-  while curTime < timeOut:
+  while True:
     endTime = time.time() + GAMELOGIC_REFRESH
     
     # Logic here.
@@ -115,11 +132,20 @@ def runGameLogic(field):
     # Copy next maps to current maps.
     field.updateMaps()
     
+    # End game if a faction has won.
+    if field.state != GAME_ONGOING:
+      break
+    
+    # End game if time-out has been reached.
+    if curTime >= timeOut:
+      field.state = GAME_TIMEOUT
+      break
+    
     curTime = time.time()
     if curTime < endTime:
       time.sleep(endTime - curTime)
   
-  print("\n")
+  GAME_OVER = True
 
 def main():
 
@@ -136,8 +162,10 @@ def main():
   gameRefreshThread = Thread(target=refreshGameScreen, args=(field,), daemon=True)
   gameRefreshThread.start()
   
-  while gameRefreshThread.is_alive():
+  while gameLogicThread.is_alive():
     time.sleep(0.5)
+  
+  listener.stop()
   
   return
 

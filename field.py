@@ -20,6 +20,7 @@ class Field:
     self.tank = None
     self.bullets = set()
     self.swarm = None
+    self.state = GAME_ONGOING           # Variable tracking if game is over.
     
     # Maps for each entity.
     # 'Next' maps are used whilst entities move

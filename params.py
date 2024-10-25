@@ -17,6 +17,8 @@ BOTH_BULLET_SYMBOL = '#'
 EMPTY_SYMBOL = ' '
 FRAME_SYMBOL = '|'
 
+TIME_OUT = 300                  # Game ends automatically after this many seconds have passed.
+
 SCREEN_REFRESH = 0.1            # Re-draw screen every SCREEN_REFRESH seconds.
 GAMELOGIC_REFRESH = 0.1         # Re-run game logic, including reading input, every GAMELOGIC_REFRESH seconds.
 
@@ -34,3 +36,8 @@ FACTION_INVADER = 2
 INPUT_LEFT = 1 << 0
 INPUT_RIGHT = 1 << 1
 INPUT_UP = 1 << 2
+
+GAME_ONGOING = 0
+GAME_VICTORY = 1
+GAME_DEFEAT = 2
+GAME_TIMEOUT = 3
